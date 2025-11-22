@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <title>2015-2025年婚姻登记与离婚登记动态折线图</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        background: #0f172a;
+        color: #f8fafc;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      #chart {
+        width: min(1200px, 100%);
+        height: min(700px, 70vh);
+        border-radius: 18px;
+        background: rgba(15, 23, 42, 0.85);
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.55);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script>
+      const rawData = [
+        { year: "2015", marriage: 1244.71, divorce: 384.14 },
+        { year: "2016", marriage: 1142.82, divorce: 415.82 },
+        { year: "2017", marriage: 1063.1, divorce: 437.4 },
+        { year: "2018", marriage: 1013.94, divorce: 446.08 },
+        { year: "2019", marriage: 927.33, divorce: 470.06 },
+        { year: "2020", marriage: 814.33, divorce: 433.9 },
+        { year: "2021", marriage: 764.3, divorce: 283.93 },
+        { year: "2022", marriage: 683.5, divorce: 287.92 },
+        { year: "2023", marriage: 768.21, divorce: 360.53 },
+        { year: "2024", marriage: 610.6, divorce: 262.1 },
+        { year: "2025前三季度", marriage: 515.2, divorce: 207.7 },
+      ];
+
+      const years = rawData.map((d) => d.year);
+      const marriage = rawData.map((d) => d.marriage);
+      const divorce = rawData.map((d) => d.divorce);
+
+      const chart = echarts.init(document.getElementById("chart"));
+
+      const option = {
+        backgroundColor: "transparent",
+        title: {
+          text: "2015-2025年婚姻登记与离婚登记趋势（单位：万对）",
+          textStyle: {
+            color: "#f8fafc",
+            fontSize: 20,
+            fontWeight: 600,
+          },
+          left: "center",
+          top: 18,
+        },
+        tooltip: {
+          trigger: "axis",
+          backgroundColor: "rgba(15,23,42,0.95)",
+          borderWidth: 0,
+          padding: 12,
+          textStyle: { color: "#e2e8f0", fontSize: 13 },
+          axisPointer: {
+            type: "line",
+            lineStyle: {
+              color: "#38bdf8",
+              width: 2,
+              type: "dashed",
+            },
+          },
+          formatter: (params) => {
+            const year = params[0].axisValue;
+            const rows = params
+              .map(
+                (item) =>
+                  `${item.marker} ${item.seriesName}：${item.value.toFixed(2)}`
+              )
+              .join("<br/>");
+            return `${year}<br/>${rows}`;
+          },
+        },
+        legend: {
+          data: ["结婚登记", "离婚登记"],
+          top: 60,
+          textStyle: { color: "#cbd5f5" },
+        },
+        grid: {
+          top: 110,
+          left: 60,
+          right: 40,
+          bottom: 60,
+        },
+        xAxis: {
+          type: "category",
+          data: years,
+          axisLine: { lineStyle: { color: "#475569" } },
+          axisLabel: { color: "#cbd5f5" },
+        },
+        yAxis: {
+          type: "value",
+          name: "万对",
+          axisLabel: {
+            color: "#cbd5f5",
+            formatter: "{value}",
+          },
+          splitLine: {
+            lineStyle: {
+              color: "rgba(148, 163, 184, 0.25)",
+            },
+          },
+        },
+        series: [
+          {
+            name: "结婚登记",
+            type: "line",
+            data: marriage,
+            smooth: true,
+            symbol: "circle",
+            symbolSize: 10,
+            lineStyle: {
+              color: "#38bdf8",
+              width: 4,
+            },
+            itemStyle: {
+              color: "#38bdf8",
+              borderColor: "#e0f2fe",
+              borderWidth: 2,
+            },
+            areaStyle: {
+              color: "rgba(56, 189, 248, 0.12)",
+            },
+            animationDuration: 1200,
+            animationEasing: "cubicOut",
+            animationDelay: (idx) => idx * 80,
+          },
+          {
+            name: "离婚登记",
+            type: "line",
+            data: divorce,
+            smooth: true,
+            symbol: "circle",
+            symbolSize: 10,
+            lineStyle: {
+              color: "#f472b6",
+              width: 4,
+            },
+            itemStyle: {
+              color: "#f472b6",
+              borderColor: "#ffe4f1",
+              borderWidth: 2,
+            },
+            areaStyle: {
+              color: "rgba(244, 114, 182, 0.12)",
+            },
+            animationDuration: 1200,
+            animationEasing: "cubicOut",
+            animationDelay: (idx) => 150 + idx * 80,
+          },
+        ],
+      };
+
+      chart.setOption(option);
+
+      let currentIndex = 0;
+      const highlightLoop = () => {
+        const dataLen = years.length;
+        chart.dispatchAction({
+          type: "downplay",
+          seriesIndex: 0,
+        });
+        chart.dispatchAction({
+          type: "downplay",
+          seriesIndex: 1,
+        });
+        chart.dispatchAction({
+          type: "highlight",
+          seriesIndex: 0,
+          dataIndex: currentIndex,
+        });
+        chart.dispatchAction({
+          type: "highlight",
+          seriesIndex: 1,
+          dataIndex: currentIndex,
+        });
+        chart.dispatchAction({
+          type: "showTip",
+          seriesIndex: 0,
+          dataIndex: currentIndex,
+        });
+        currentIndex = (currentIndex + 1) % dataLen;
+      };
+
+      let timer = setInterval(highlightLoop, 2500);
+      highlightLoop();
+
+      window.addEventListener("resize", () => {
+        chart.resize();
+      });
+
+      window.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          clearInterval(timer);
+        } else {
+          highlightLoop();
+          timer = setInterval(highlightLoop, 2500);
+        }
+      });
+    </script>
+  </body>
+</html>
